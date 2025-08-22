@@ -5,8 +5,8 @@ this uses `http` which is a tad bit faster than `express` :), though im primaril
 
 ### free endpoint
 
-Im hosting this at `or-proxy.glorious.host` (i dont have a personal domain yet so ill use this for convinence)
+<!-- Im hosting this at `or-proxy.glorious.host` (i dont have a personal domain yet so ill use this for convinence)
 
 use https://or-proxy.glorious.host/v1 for openai base url
 
-rate limits are set at `60 req / minute` and `1000 / 30 mins` PER api key (please be nice and dont abuse it)
+rate limits are set at `60 req / minute` and `1000 / 30 mins` PER api key (please be nice and dont abuse it) -->
