@@ -1,14 +1,17 @@
 const http = require("http");
 const https = require("https");
-require('dotenv').config();
+require("dotenv").config();
 
 const MINUTE_MS = 60000;
+const MAX_BODY_SIZE = 1024 * 1024;
 const THIRTY_MIN_MS = 30 * 60000;
 
 const RL_PER_MINUTE = Number.parseInt(process.env.RL_PER_MINUTE || "60", 10);
 const RL_PER_30MIN = Number.parseInt(process.env.RL_PER_30MIN || "1000", 10);
 const RL_MAX_KEYS = Number.parseInt(process.env.RL_MAX_KEYS || "10000", 10);
 const RL_SWEEP_MS = Number.parseInt(process.env.RL_SWEEP_MS || "600000", 10);
+
+const REQUEST_TIMEOUT_MS = Number.parseInt(process.env.REQUEST_TIMEOUT_MS || "120000", 10);
 const PORT = Number.parseInt(process.env.PORT || "8181", 10);
 
 const rlStore = new Map();
@@ -212,7 +215,15 @@ function parseExtra(str) {
 function getBody(req) {
 	return new Promise((resolve, reject) => {
 		let data = "";
-		req.on("data", (chunk) => (data += chunk));
+		let size = 0;
+		req.on("data", (chunk) => {
+			size += chunk.length;
+			if (size > MAX_BODY_SIZE) {
+				reject(new Error("Request too large"));
+				return;
+			}
+			data += chunk;
+		});
 		req.on("end", () => resolve(data));
 		req.on("error", reject);
 	});
@@ -227,7 +238,7 @@ function forwardRequest(req, res, targetPath = req.url, isStreaming = false) {
 			...req.headers,
 			host: "openrouter.ai",
 		},
-		rejectUnauthorized: false,
+        timeout: REQUEST_TIMEOUT_MS
 	};
 	const forwardReq = https.request(options, (forwardRes) => {
 		const responseHeaders = { ...forwardRes.headers };
