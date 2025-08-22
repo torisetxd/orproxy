@@ -1,5 +1,6 @@
 const http = require("http");
 const https = require("https");
+require('dotenv').config();
 
 const MINUTE_MS = 60000;
 const THIRTY_MIN_MS = 30 * 60000;
@@ -8,6 +9,7 @@ const RL_PER_MINUTE = Number.parseInt(process.env.RL_PER_MINUTE || "60", 10);
 const RL_PER_30MIN = Number.parseInt(process.env.RL_PER_30MIN || "1000", 10);
 const RL_MAX_KEYS = Number.parseInt(process.env.RL_MAX_KEYS || "10000", 10);
 const RL_SWEEP_MS = Number.parseInt(process.env.RL_SWEEP_MS || "600000", 10);
+const PORT = Number.parseInt(process.env.PORT || "8181", 10);
 
 const rlStore = new Map();
 
@@ -164,6 +166,25 @@ function parseExtra(str) {
 
 	result.model = parts[0];
 
+	function setNestedProperty(obj, path, value) {
+		const keys = path.split(".");
+		let current = obj;
+
+		for (let i = 0; i < keys.length - 1; i++) {
+			const key = keys[i];
+			if (
+				!(key in current) ||
+				typeof current[key] !== "object" ||
+				current[key] === null
+			) {
+				current[key] = {};
+			}
+			current = current[key];
+		}
+
+		current[keys[keys.length - 1]] = value;
+	}
+
 	for (let i = 1; i < parts.length; i++) {
 		const [key, val] = parts[i].split("_");
 		if (!key || val === undefined) continue;
@@ -178,7 +199,11 @@ function parseExtra(str) {
 			}
 		}
 
-		result[key] = parsedVal;
+		if (key.includes(".")) {
+			setNestedProperty(result, key, parsedVal);
+		} else {
+			result[key] = parsedVal;
+		}
 	}
 
 	return result;
@@ -289,4 +314,4 @@ http.createServer(async (req, res) => {
 		res.writeHead(404);
 		res.end("Not Found");
 	}
-}).listen(8181, () => console.log("OpenRouter proxy running on :8181"));
+}).listen(PORT, () => console.log(`OpenRouter proxy running on :${PORT}`));
