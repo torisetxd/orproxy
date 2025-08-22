@@ -10,3 +10,5 @@ Im hosting this at `or-proxy.glorious.host` (i dont have a personal domain yet s
 use https://or-proxy.glorious.host/v1 for openai base url
 
 rate limits are set at `60 req / minute` and `1000 / 30 mins` PER api key (please be nice and dont abuse it)
+
+max 1 mb request & 120s timeout (configurable if you manually deploy via .env)
