@@ -1,5 +1,5 @@
-import http from "http";
-import https from "https";
+const http = require("http");
+const https = require("https");
 
 const MINUTE_MS = 60000;
 const THIRTY_MIN_MS = 30 * 60000;
